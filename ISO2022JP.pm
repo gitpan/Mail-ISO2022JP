@@ -4,7 +4,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '0.01'; # 2003-03-10
+our $VERSION = '0.02'; # 2003-03-10
 
 use Carp;
 
@@ -124,12 +124,12 @@ Origination date is not a essential information for email (sendmail program will
 
 Outputs already composed mail data.
 
-=item post() *EXPERIMENTAL
+=item post() *EXPERIMENTAL*
 
 Posts a mail using sendmail program.
 At the default setting, it is supposed that sendmail program's name is `sendmail' under the systems's PATH environmental variable. You can specify exact location with sendmail() method.
 
-=item sendmail($path) *EXPERIMENTAL
+=item sendmail($path) *EXPERIMENTAL*
 
 Specifies sendmail location. ex. '/usr/bin/sendmail'
 
@@ -151,7 +151,7 @@ This module runs under Unicode/UTF-8 environment (then Perl5.8 or later is requi
 
 =head1 AUTHOR
 
-Masanori HATA E<lt>lovewing@geocities.co.jpE<gt>
+Masanori HATA E<lt>lovewing@geocities.co.jpE<gt> (Saitama, JAPAN)
 
 =head1 COPYRIGHT
 
