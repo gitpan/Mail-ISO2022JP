@@ -1,5 +1,9 @@
 Revision history for Perl extension Mail::ISO2022JP.
 
+0.04  2003-03-12 00:03:27
+	- serious bug about that folding line at the header field had
+	  never been cared has fixed
+
 0.03  2003-03-11 16:14:30
 	- modified POD and README
 

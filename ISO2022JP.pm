@@ -4,7 +4,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '0.03'; # 2003-03-11
+our $VERSION = '0.04'; # 2003-03-12
 
 use Carp;
 
@@ -54,8 +54,9 @@ sub compose {
 	
 	# Encode with MIME-Base64 method
 	foreach my $entity ($recipient_name, $sender_name, $subject) {
-		$entity = '=?ISO-2022-JP?B?' . encode_base64($entity) . '?=';
-		$entity =~ s/\n//;
+		$entity = encode_base64($entity);
+		$entity =~ s/\n/\n\t/g;
+		$entity = "=?ISO-2022-JP?B?\n\t" . $entity . '?=';
 	}
 	
 	$$self{'mail'} = <<"EOF";
