@@ -29,12 +29,12 @@ From: taro@cpan.tld
 To: sakura@cpan.tld, yuri@cpan.tld
 Subject: 
  =?ISO-2022-JP?B?GyRCRnxLXDhsJEc9cSQrJGwkP0JqTD4bKEI=?=
- 
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: base64
 
-$BF|K\8l$G=q$+$l$?K\J8!#(B
+GyRCRnxLXDhsJEc9cSQrJGwkP0tcSjghIxsoQg==
+
 EOF
 
 is ( $got, $expected,
@@ -47,7 +47,7 @@ $mail->set('To_addr'  , 'sakura@cpan.tld, yuri@cpan.tld');
 # mail subject containing Japanese characters.
 $mail->set('Subject'  , '日本語で書かれた題名。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
 # mail body    containing Japanese characters.
-$mail->set('Body'     , '日本語で書かれた本文。');
+$mail->set('Body'     , '日本語で書かれた本文。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
 # output the composed mail
 $mail->compose;
 my $got = $mail->output;
@@ -60,13 +60,14 @@ Subject:
  =?ISO-2022-JP?B?GyRCRnxLXDhsJEc9cSQrJGwkP0JqTD4hIyRIJEYkYkQ5JCQhI0Q5GyhC?= 
  =?ISO-2022-JP?B?GyRCJCREOSQkJCpPQyEjJEEkYyRzJEglKCVzJTMhPCVJJEckLSRrGyhC?= 
  =?ISO-2022-JP?B?GyRCJE4kRyQ3JGckJiQrISkbKEI=?=
- 
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: base64
 
-$BF|K\8l$G=q$+$l$?K\J8!#(B
+GyRCRnxLXDhsJEc9cSQrJGwkP0tcSjghIyRIJEYkYkQ5JCQhI0Q5JCREOSQkJCpPQyEjJEEkYyRz
+JEglKCVzJTMhPCVJJEckLSRrJE4kRyQ3JGckJiQrISkbKEI=
+
 EOF
 
 is ( $got, $expected,
-	'same as above but with longer MIME Base64 encoded header');
+	'same as above but with longer MIME Base64 encoded subject and body');

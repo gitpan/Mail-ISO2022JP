@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.04_04'; # 2003-03-20
+our $VERSION = '0.04_05'; # 2003-03-20
 
 use Encode;
 use MIME::Base64;
@@ -57,6 +57,7 @@ sub compose {
 	my $body    = decode('utf8', $$self{'Body'   });
 	my @subject = encoded($subject);
 	$body = encode('iso-2022-jp', $body);
+	$body = encode_base64($body);
 	
 	$$self{'mail'} = <<"EOF";
 From: $$self{'From_addr'}
@@ -64,7 +65,7 @@ To: $$self{'To_addr'}
 Subject: @subject
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: base64
 
 $body
 EOF
@@ -91,7 +92,7 @@ sub encoded {
 	foreach my $line (@lines) {
 		$line = "\n $line";
 	}
-	$lines[$#lines] = "$lines[$#lines]\n ";
+#	$lines[$#lines] = "$lines[$#lines]\n ";
 	
 	return @lines;
 }
@@ -236,6 +237,8 @@ Specify the mail subject. $subject can contain Japanese characters. Note that th
 =item set('Body', $body)
 
 Specify the mail body. $body can contain Japanese characters. Note that this module runs under Unicode/UTF-8 environment, you should input these data in UTF-8 character encoding.
+
+Note: For the purpose to free from the rule that enforce user to line fold, though ISO-2022-JP is a 7bit encoding, body text is encoded again with Base64 internally.
 
 =item set('Date', $date)
 
