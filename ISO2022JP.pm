@@ -3,10 +3,9 @@ package Mail::ISO2022JP;
 use 5.008;
 use strict;
 use warnings;
-
-our $VERSION = '0.04_01'; # 2003-03-19
-
 use Carp;
+
+our $VERSION = '0.04_02'; # 2003-03-20
 
 use Encode;
 use MIME::Base64;
@@ -44,14 +43,6 @@ sub date {
 	return $self;
 }
 
-sub iso2022jp {	# Encode (from UTF-8) to ISO-2022-JP
-	my ($self, @entities) = @_;
-	foreach my $entity (@entities) {
-		$$self{$entity} = encode( 'iso-2022-jp', decode('utf8', $$self{$entity}) );
-	}
-	return $self;
-}
-
 sub base64 { # Encode with MIME-Base64 method
 	my ($self, @entities) = @_;
 	foreach my $entity (@entities) {
@@ -78,7 +69,10 @@ sub compose {
 #		$entity = "=?ISO-2022-JP?B?\n\t" . $entity . '?=';
 #	}
 	
-	my @subject = encoded($$self{'Subject'});
+	my $subject = decode('utf8', $$self{'Subject'});
+	my $body    = decode('utf8', $$self{'Body'   });
+	my @subject = encoded($subject);
+	$body = encode('iso-2022-jp', $body);
 	
 	my $mail = <<"EOF";
 From: $$self{'From_addr'}
@@ -88,7 +82,7 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: 7bit
 
-$$self{'Body'}
+$body
 EOF
 return $mail;
 #	if ($$self{'time'}) {
@@ -107,8 +101,6 @@ return $mail;
 
 sub encoded {
 	my ($string) = @_;
-	
-	$string = decode('utf8', $string);
 	
 	my @lines = _encoded_word($string);
 	
@@ -217,23 +209,29 @@ Mail::ISO2022JP - compose ISO-2022-JP encoded email
   $mail->set('From_addr', 'taro@cpan.tld');
   $mail->set('To_addr'  , 'sakura@cpan.tld, yuri@cpan.tld');
   # mail subject containing Japanese characters.
-  $mail->set('Subject'  , '日本語で書かれた題名');
-  # mail bocy    containing Japanese characters.
-  $mail->set('Body'     , '日本語で書かれた本文。');
-  # convert body to ISO-2022-JP (from UTF-8)
-  $mail->iso2022jp('Body');
+  $mail->set('Subject'  , 'Subject_Containing_Japanese_Characters');
+  # mail body    containing Japanese characters.
+  $mail->set('Body'     , 'Body_Containing_Japanese_Characters');
   # output the composed mail
   print $mail->compose;
 
 =head1 DESCRIPTION
 
-This module is mainly for Japanese perl programmers. Because of its 7bit/US-ASCII character based regulation, an internet mail is required to compose through some encoding process when it includes non-7bit/US-ASCII characters. ISO-2022-JP is one of Japanese character encoding, which is usually used among Japanese people for the mail encoding. For ISO-2022-JP is 7bit encoding, to use it in mail message body has no problem. But it still has problem to use ISO-2022-JP in mail headers, since mail headers should be expressed only in US-ASCII characters. Then we should encode ISO-2022-JP header data (ex. sender name, recipient name, subject) again with MIME Base64 method. This module automates those kinds of operations.
+This module is mainly for Japanese Perl programmers those who wants to compose an email.
+
+For some reasons, most Japanese internet users have chosen ISO-2022-JP 7bit character encoding for email rather than the other 8bit encodings (eg. EUC-JP, Shift_JIS).
+
+We can use ISO-2022-JP encoded Japanese text as message body safely in an email.
+
+But we should not use ISO-2022-JP encoded Japanese text as a header. We should escape some reserved 'special' characters before composing a header. To enable it, we encode ISO-2022-JP encoded Japanese text with MIME Base64 encoding. Thus MIME Base64 encoded ISO-2022-JP encoded Japanese text is safely using in a mail header.
+
+This module has developed to intend to automate those kinds of operations.
 
 =head1 METHODS
 
 =over
 
-=item new()
+=item new
 
 Creates a new object.
 
@@ -252,10 +250,6 @@ To set mail subject. $subject can contain Japanese characters. Note that this mo
 =item set('Body', $body)
 
 To set mail body. $body can contain Japanese characters. Note that this module runs under Unicode/UTF-8 environment, you should input these data in UTF-8 character encoding.
-
-=item iso2022jp('Body')
-
-Converts mail body (which has already been input) into ISO-2022-JP encoding (from UTF-8).
 
 =item compose
 
@@ -301,8 +295,6 @@ Specifies sendmail location. ex. '/usr/bin/sendmail'
 =head1 NOTES
 
 This module runs under Unicode/UTF-8 environment (then Perl5.8 or later is required), you should input data in UTF-8 character encoding.
-
-Additionally, this POD contains Japanese Unicode/UTF-8 characters. Some characters cannot be displayed correctly without proper fonts and on a pager which cannot handle Unicode/UTF-8.
 
 =head1 TO DO
 

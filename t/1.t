@@ -16,10 +16,8 @@ $mail->set('From_addr', 'taro@cpan.tld');
 $mail->set('To_addr'  , 'sakura@cpan.tld, yuri@cpan.tld');
 # mail subject containing Japanese characters.
 $mail->set('Subject'  , '日本語で書かれた題名');
-# mail bocy    containing Japanese characters.
+# mail body    containing Japanese characters.
 $mail->set('Body'     , '日本語で書かれた本文。');
-# convert body to ISO-2022-JP (from UTF-8)
-$mail->iso2022jp('Body');
 # output the composed mail
 my $got = $mail->compose;
 
@@ -44,10 +42,8 @@ $mail->set('From_addr', 'taro@cpan.tld');
 $mail->set('To_addr'  , 'sakura@cpan.tld, yuri@cpan.tld');
 # mail subject containing Japanese characters.
 $mail->set('Subject'  , '日本語で書かれた題名。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
-# mail bocy    containing Japanese characters.
+# mail body    containing Japanese characters.
 $mail->set('Body'     , '日本語で書かれた本文。');
-# convert body to ISO-2022-JP (from UTF-8)
-$mail->iso2022jp('Body');
 # output the composed mail
 my $got = $mail->compose;
 
