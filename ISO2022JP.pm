@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.04_02'; # 2003-03-20
+our $VERSION = '0.04_03'; # 2003-03-20
 
 use Encode;
 use MIME::Base64;
@@ -43,16 +43,6 @@ sub date {
 	return $self;
 }
 
-sub base64 { # Encode with MIME-Base64 method
-	my ($self, @entities) = @_;
-	foreach my $entity (@entities) {
-		$$self{$entity} = encode_base64($$self{$entity});
-		$$self{$entity} =~ s/\n/\n\t/g;
-		$$self{$entity} = "=?ISO-2022-JP?B?\n\t" . $$self{$entity} . '?=';
-	}
-	return $self;
-}
-
 sub set {
 	my ($self, $entity, $value) = @_;
 	$$self{$entity} = $value;
@@ -61,13 +51,6 @@ sub set {
 
 sub compose {
 	my ($self) = @_;
-	
-	# Encode with MIME-Base64 method
-#	foreach my $entity ($recipient_name, $sender_name, $subject) {
-#		$entity = encode_base64($entity);
-#		$entity =~ s/\n/\n\t/g;
-#		$entity = "=?ISO-2022-JP?B?\n\t" . $entity . '?=';
-#	}
 	
 	my $subject = decode('utf8', $$self{'Subject'});
 	my $body    = decode('utf8', $$self{'Body'   });
@@ -95,9 +78,9 @@ return $mail;
 
 # RFC2822 describes about a line length
 # Max: 998 = 1000 - (CR + LF)
-# Rec: 76  = 78   - (CR + LF)
+# Rec:  76 =   78 - (CR + LF)
 # RFC2047 describes about an encoded-word length
-# Max: 75  = 76   - SPACE
+# Max:  75 =   76 - SPACE
 
 sub encoded {
 	my ($string) = @_;
