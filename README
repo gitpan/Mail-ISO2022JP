@@ -1,0 +1,27 @@
+Mail/ISO2022JP version 0.01
+===========================
+
+This module composes a ISO-2022-JP encoded email.
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires perl5.8 or later.
+This module requires these other modules and libraries:
+
+Encode
+MIME::Base64
+
+COPYRIGHT AND LICENCE
+
+Copyright (c) 2003 Masanori HATA. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
