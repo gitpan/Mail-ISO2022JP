@@ -1,11 +1,11 @@
 package Mail::ISO2022JP;
 
+our $VERSION = '0.06'; # 2003-03-31
+
 use 5.008;
 use strict;
 use warnings;
 use Carp;
-
-our $VERSION = '0.05_03'; # 2003-03-30
 
 use Encode;
 use MIME::Base64;
@@ -14,28 +14,7 @@ sub new {
 	my $class = shift;
 	my $self = {};
 	bless $self, $class;
-	$$self{'sendmail'} = 'sendmail';
 	return $self;
-}
-
-sub sendmail {
-	my $self = shift;
-	$$self{'sendmail'} = shift;
-	return $self;
-}
-
-sub post {
-	my ($self) = @_;
-	open(MAIL, "| $$self{'sendmail'} -t -i")
-		or croak "Could not use sendmail program.\n";
-	print MAIL $$self{'mail'};
-	close MAIL;
-	return $self;
-}
-
-sub output {
-	my ($self) = @_;
-	return $$self{'mail'};
 }
 
 sub set {
@@ -44,98 +23,104 @@ sub set {
 	return $self;
 }
 
-sub add_orig {
-	my ($self, $addr_spec, $name) = @_;
-	
-	my $address;
-	if ($name) {
-		if ( _check_if_contain_japanese($name) ) {
-			my $name = encoded_header( decode('utf8', $name) );
-			$address = "$name\n <$addr_spec>";
-		}
-		else {
-			if ( length($name) <= 73) {
-				$address = "\"$name\"\n <$addr_spec>";
-			}
-            else {
-				my @name = split(/ /, $name);
-				my $too_long_word = 0;
-				foreach my $piece (@name) {
-					if ( length($piece) > 75 ) {
-						$too_long_word = 1;
-						last;
-					}
-				}
-				if ($too_long_word) {
-					$name = encoded_header_ascii($name);
-					$address = "$name\n <$addr_spec>";
-				}
-				else {
-					$name = join("\n ", @name);
-					$address = "$name\n <$addr_spec>";
-				}
-			}
-		}
-	}
-	else {
-		$address = $addr_spec;
-	}
-	
-	if ($$self{'From'}) {
-		$$self{'From'} = "$$self{'From'},\n $address";
-	}
-	else {
-		$$self{'From'} = $address;
-    }
-	
+sub body {
+	my($self, $string) = @_;
+	$$self{'body'} = $string;
 	return $self;
+}
+
+sub date {
+	my($self, $date_time) = @_;
+	$$self{'Date'} = $date_time;
+	return $self;
+}
+
+sub build {
+	my $self = shift;
+	my @key = $self->_header_order;
+	my @header;
+	foreach my $key (@key) {
+		unless ($key eq 'body') {
+			push(@header, "$key: $$self{$key}");
+		}
+	}
+	return join("\n", @header);
+}
+
+sub _header_order {
+	my $self = shift;
+	my @key = keys(%$self);
+	my @order = qw(
+		Date From Sender Reply-To To Cc Bcc
+		Message-ID In-Reply-To References
+		Subject Comments Keywords
+	);
+	
+	my @newkey;
+	foreach my $order (@order) {
+		foreach my $key (@key) {
+			if ($key eq $order) {
+				push(@newkey, $key);
+			}
+		}
+	}
+	
+	my @oldkey;
+	foreach my $key (@key) {
+		my $exist = 0;
+		foreach my $newkey (@newkey) {
+			if ($key eq $newkey) {
+				$exist = 1;
+				last;
+			}
+		}
+		if ($exist != 1) {
+			push(@oldkey, $key);
+		}
+	}
+	
+	return @newkey, @oldkey;
+}
+########################################################################
+# add a originator address or a destination address.
+sub add_from {
+	my($self, $addr_spec, $name) = @_;
+	$self->_add_mailbox('From', $addr_spec, $name);
+	return $self
 }
 
 sub sender {
-	my ($self, $addr_spec, $name) = @_;
-	
-	my $address;
-	if ($name) {
-		if ( _check_if_contain_japanese($name) ) {
-			my $name = encoded_header( decode('utf8', $name) );
-			$address = "$name\n <$addr_spec>";
-		}
-		else {
-			if ( length($name) <= 73) {
-				$address = "\"$name\"\n <$addr_spec>";
-			}
-            else {
-				my @name = split(/ /, $name);
-				my $too_long_word = 0;
-				foreach my $piece (@name) {
-					if ( length($piece) > 75 ) {
-						$too_long_word = 1;
-						last;
-					}
-				}
-				if ($too_long_word) {
-					$name = encoded_header_ascii($name);
-					$address = "$name\n <$addr_spec>";
-				}
-				else {
-					$name = join("\n ", @name);
-					$address = "$name\n <$addr_spec>";
-				}
-			}
-		}
-	}
-	else {
-		$address = $addr_spec;
-	}
-	
-	$$self{'Sender'} = $address;
-	
-	return $self;
+	my($self, $addr_spec, $name) = @_;
+	$self->_add_mailbox('Sender', $addr_spec, $name);
+	return $self
 }
-
 
 sub add_reply {
-	my ($self, $addr_spec, $name) = @_;
+	my($self, $addr_spec, $name) = @_;
+	$self->_add_mailbox('Reply-To', $addr_spec, $name);
+	return $self
+}
+
+sub add_to {
+	my($self, $addr_spec, $name) = @_;
+	$self->_add_mailbox('To', $addr_spec, $name);
+	return $self
+}
+
+sub add_cc {
+	my($self, $addr_spec, $name) = @_;
+	$self->_add_mailbox('Cc', $addr_spec, $name);
+	return $self
+}
+
+sub add_bcc {
+	my($self, $addr_spec, $name) = @_;
+	$self->_add_mailbox('Bcc', $addr_spec, $name);
+	return $self
+}
+
+sub _add_mailbox {
+	my($self, $field, $addr_spec, $name) = @_;
 	
 	my $address;
 	if ($name) {
@@ -171,159 +156,23 @@ sub add_reply {
 		$address = $addr_spec;
 	}
 	
-	if ($$self{'Reply'}) {
-		$$self{'Reply'} = "$$self{'Reply'},\n $address";
+	if ($$self{$field}) {
+		if ($field eq 'Sender') {
+			croak "a violation of the RFC2822 - you can specify the 'Sender:' field with only one 'mailbox'";
+		}
+        else {
+			$$self{$field} = "$$self{$field},\n $address";
+		}
 	}
 	else {
-		$$self{'Reply'} = $address;
+		$$self{$field} = "\n $address";
     }
 	
 	return $self;
 }
-
-sub add_dest {
-	my ($self, $addr_spec, $name) = @_;
-	
-	my $address;
-	if ($name) {
-		if ( _check_if_contain_japanese($name) ) {
-			my $name = encoded_header( decode('utf8', $name) );
-			$address = "$name\n <$addr_spec>";
-		}
-		else {
-			if ( length($name) <= 73) {
-				$address = "\"$name\"\n <$addr_spec>";
-			}
-            else {
-				my @name = split(/ /, $name);
-				my $too_long_word = 0;
-				foreach my $piece (@name) {
-					if ( length($piece) > 75 ) {
-						$too_long_word = 1;
-						last;
-					}
-				}
-				if ($too_long_word) {
-					$name = encoded_header_ascii($name);
-					$address = "$name\n <$addr_spec>";
-				}
-				else {
-					$name = join("\n ", @name);
-					$address = "$name\n <$addr_spec>";
-				}
-			}
-		}
-	}
-	else {
-		$address = $addr_spec;
-	}
-	
-	if ($$self{'To'}) {
-		$$self{'To'} = "$$self{'To'},\n $address";
-	}
-	else {
-		$$self{'To'} = $address;
-    }
-	
-	return $self;
-}
-
-sub add_dest_cc {
-	my ($self, $addr_spec, $name) = @_;
-	
-	my $address;
-	if ($name) {
-		if ( _check_if_contain_japanese($name) ) {
-			my $name = encoded_header( decode('utf8', $name) );
-			$address = "$name\n <$addr_spec>";
-		}
-		else {
-			if ( length($name) <= 73) {
-				$address = "\"$name\"\n <$addr_spec>";
-			}
-            else {
-				my @name = split(/ /, $name);
-				my $too_long_word = 0;
-				foreach my $piece (@name) {
-					if ( length($piece) > 75 ) {
-						$too_long_word = 1;
-						last;
-					}
-				}
-				if ($too_long_word) {
-					$name = encoded_header_ascii($name);
-					$address = "$name\n <$addr_spec>";
-				}
-				else {
-					$name = join("\n ", @name);
-					$address = "$name\n <$addr_spec>";
-				}
-			}
-		}
-	}
-	else {
-		$address = $addr_spec;
-	}
-	
-	if ($$self{'Cc'}) {
-		$$self{'Cc'} = "$$self{'Cc'},\n $address";
-	}
-	else {
-		$$self{'Cc'} = $address;
-    }
-	
-	return $self;
-}
-
-sub add_dest_bcc {
-	my ($self, $addr_spec, $name) = @_;
-	
-	my $address;
-	if ($name) {
-		if ( _check_if_contain_japanese($name) ) {
-			my $name = encoded_header( decode('utf8', $name) );
-			$address = "$name\n <$addr_spec>";
-		}
-		else {
-			if ( length($name) <= 73) {
-				$address = "\"$name\"\n <$addr_spec>";
-			}
-            else {
-				my @name = split(/ /, $name);
-				my $too_long_word = 0;
-				foreach my $piece (@name) {
-					if ( length($piece) > 75 ) {
-						$too_long_word = 1;
-						last;
-					}
-				}
-				if ($too_long_word) {
-					$name = encoded_header_ascii($name);
-					$address = "$name\n <$addr_spec>";
-				}
-				else {
-					$name = join("\n ", @name);
-					$address = "$name\n <$addr_spec>";
-				}
-			}
-		}
-	}
-	else {
-		$address = $addr_spec;
-	}
-	
-	if ($$self{'Bcc'}) {
-		$$self{'Bcc'} = "$$self{'Bcc'},\n $address";
-	}
-	else {
-		$$self{'Bcc'} = $address;
-    }
-	
-	return $self;
-}
-
+########################################################################
 sub _check_if_contain_japanese {
-	my ($string) = @_;
+	my $string = shift;
 	
 	$string = decode('utf8', $string);
 	$string =~ tr/\n//d; # ignore line-break
@@ -335,46 +184,26 @@ sub _check_if_contain_japanese {
 	# qcontent = qtext / quoted-pair
 	# quoted-string = [CFWS] DQUOTE *([FWS] qcontent) [FWS] DQUOTE [CFWS]
 }
+########################################################################
+sub subject {
+	my($self, $string) = @_;
+	$$self{'Subject'} = encoded_header( decode('utf8', $string) );
+	$$self{'Subject'} = "\n $$self{'Subject'}";
+	return $self;
+}
 
 sub compose {
-	my ($self) = @_;
+	my $self = shift;
 	
 	my $subject = encoded_header( decode('utf8', $$self{'Subject'}) );
-	my $body = encode( 'iso-2022-jp', decode('utf8', $$self{'Body'}) );
+	my $body = encode( 'iso-2022-jp', decode('utf8', $$self{'body'}) );
 #	$body = encode_base64($body);
 	
-	if ($$self{'Sender'}) {
-		$$self{'Sender'} = "\nSender:\n $$self{'Sender'}";
-	}
-	else {
-		$$self{'Sender'} = '';
-	}
-	if ($$self{'Reply'}) {
-		$$self{'Reply'} = "\nReply-To:\n $$self{'Reply'}";
-	}
-	else {
-		$$self{'Reply'} = '';
-	}
-	if ($$self{'Cc'}) {
-		$$self{'Cc'} = "\nCc:\n $$self{'Cc'}";
-	}
-	else {
-		$$self{'Cc'} = '';
-	}
-	if ($$self{'Bcc'}) {
-		$$self{'Bcc'} = "\nBcc:\n $$self{'Bcc'}";
-	}
-	else {
-		$$self{'Bcc'} = '';
-	}
+	my $header = $self->build;
 	
-	$$self{'mail'} = <<"EOF";
-From:
- $$self{'From'}$$self{'Sender'}$$self{'Reply'}
-To:
- $$self{'To'}$$self{'Cc'}$$self{'Bcc'}
-Subject: 
- $subject
+	
+	return <<"EOF";
+$header
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: 7bit
@@ -382,11 +211,6 @@ X-Mailer: ISO2022JP.pm v$VERSION (Mail::ISO2022JP http://www.cpan.org/)
 
 $body
 EOF
-	if ($$self{'Date'}) {
-		$$self{'mail'} = "Date: $$self{'Date'}\n$$self{'mail'}";
-	}
-	
-	return $self;
 }
 
 ########################################################################
@@ -570,7 +394,11 @@ __END__
 
 =head1 NAME
 
-Mail::ISO2022JP - compose ISO-2022-JP encoded email
+Mail::ISO2022JP - **DEPRECATED** compose ISO-2022-JP encoded email
+
+=head1 ANNOUNCE
+
+This module has moved to the namespace of Lingua::JA::Mail. So this module will be no more maintenanced. Please see its successor L<Lingua::JA::Mail>.
 
 =head1 SYNOPSIS
 
@@ -578,25 +406,23 @@ Mail::ISO2022JP - compose ISO-2022-JP encoded email
  
  $mail = Mail::ISO2022JP->new;
  
- $mail->add_orig('taro@cpan.tld', 'YAMADA, Taro');
+ $mail->add_from('taro@cpan.tld', 'YAMADA, Taro');
  
  # display-name is omitted:
-  $mail->add_dest('kaori@cpan.tld');
+  $mail->add_to('kaori@cpan.tld');
  # with a display-name in the US-ASCII characters:
-  $mail->add_dest('sakura@cpan.tld', 'Sakura HARUNO');
+  $mail->add_to('sakura@cpan.tld', 'Sakura HARUNO');
  # with a display-name containing Japanese characters:
-  $mail->add_dest('yuri@cpan.tld', 'NAME CONTAINING JAPANESE CHARS');
+  $mail->add_to('yuri@cpan.tld', 'NAME CONTAINING JAPANESE CHARS');
  
  # mail subject containing Japanese characters:
-  $mail->set('Subject', 'SUBJECT CONTAINING JAPANESE CHARS');
+  $mail->subject('SUBJECT CONTAINING JAPANESE CHARS');
  
  # mail body    containing Japanese characters:
-  $mail->set('Body'   , 'BODY CONTAINING JAPANESE CHARS');
+  $mail->body('BODY CONTAINING JAPANESE CHARS');
  
- # compose
-  $mail->compose;
- # output the composed mail
-  print $mail->output;
+ # compose and output the mail
+  print $mail->compose;
 
 =head1 DESCRIPTION
 
@@ -618,7 +444,7 @@ This module has developed to intend to automate those kinds of operations.
 
 Creates a new object.
 
-=item add_orig($addr_spec [, $display_name])
+=item add_to($addr_spec [, $display_name])
 
 This method specifies a originator address (C<From:> header). The $addr_spec must be valid as an C<addr-spec> in the RFC2822 specification. Be careful, an C<addr-spec> doesn't include the surrounding tokens "<" and ">" (angles).
 
@@ -634,7 +460,7 @@ It is basically same as C<add_orig()> but specifies a C<Reply-To:> originator he
 
 When you specify multiple C<From:> header address, you must specify the C<Sender:> header address. This address must be one address and multiple addresses are not allowed.
 
-=item add_dest($addr_spec [, $display_name])
+=item add_from($addr_spec [, $display_name])
 
 This method specifies a destination address (C<To:> header). The $addr_spec must be valid as an C<addr-spec> in the RFC2822 specification. Be careful, an C<addr-spec> doesn't include the surrounding tokens "<" and ">" (angles).
 
@@ -642,21 +468,21 @@ The $display_name is optional value. It must be valid as an C<display-name> in t
 
 You can use repeatedly this method as much as you wish to specify more than one address.
 
-=item add_dest_cc(), add_dext_bcc()
+=item add_cc(), add_bcc()
 
 These are basically same as C<add_dest()> but specifies a C<Cc:> or C<Bcc:> destination header address.
 
-=item set('Subject', $subject)
+=item subject($subject)
 
 Specify the mail subject. $subject can contain Japanese characters. Note that this module runs under Unicode/UTF-8 environment, you should input these data in UTF-8 character encoding.
 
-=item set('Body', $body)
+=item body($body)
 
 Specify the mail body. $body can contain Japanese characters. Note that this module runs under Unicode/UTF-8 environment, you should input these data in UTF-8 character encoding.
 
 Note: RFC1468 describes about a line should be tried to keep length within 80 display columns. Then each JIS X 0208 character takes two columns, and the escape sequences do not take any. 
 
-=item set('Date', $date)
+=item date($date)
 
 Specify the mail origination date. Note that date-time format should be compliant to the format of RFC2822 specification. It is like blow:
      
@@ -666,22 +492,15 @@ Don't forget to quote the string. If you don't specify date, sendmail program ma
 
 =item compose
 
-Compose a formed email.
-
-=item post *EXPERIMENTAL*
-
-Posts a mail using sendmail program.
-At the default setting, it is supposed that sendmail program's name is `sendmail' under the systems's PATH environmental variable. You can specify exact location with sendmail() method.
-
-=item sendmail($path) *EXPERIMENTAL*
-
-Specifies sendmail location. ex. '/usr/bin/sendmail'
+Composes and returns a formed email.
 
 =back
 
 =head1 SEE ALSO
 
 =over
+
+=item Perl Module: L<Lingua::JA::Mail> (Successor of this module)
 
 =item RFC2822: L<http://www.ietf.org/rfc/rfc2822.txt> (Mail)
 
@@ -702,11 +521,6 @@ Specifies sendmail location. ex. '/usr/bin/sendmail'
 =head1 NOTES
 
 This module runs under Unicode/UTF-8 environment (then Perl5.8 or later is required), you should input data in UTF-8 character encoding.
-
-
-=head1 TO DO
-
-To coodinate with the other existing modules about Mail -- to divide and to transfer to any existants of its own functions as much as it could be. (However, it seems not an easy work because of our Japanese charset encoding's double-byte nature and so on...)
 
 =head1 THANKS TO:
 

@@ -15,31 +15,30 @@ my $mail = Mail::ISO2022JP->new;
 isa_ok( $mail, 'Mail::ISO2022JP' );
 
 # compose a mail containing Japanese characters.
-$mail->set('Date', 'Thu, 20 Mar 2003 15:21:18 +0900');
-$mail->add_orig('taro@cpan.tld', 'YAMADA, Taro');
+$mail->date('Thu, 20 Mar 2003 15:21:18 +0900');
+$mail->add_from('taro@cpan.tld', 'YAMADA, Taro');
 
 # display-name is omitted:
- $mail->add_dest('kaori@cpan.tld');
+ $mail->add_to('kaori@cpan.tld');
 # with a display-name in the US-ASCII characters:
- $mail->add_dest('sakura@cpan.tld', 'Sakura HARUNO');
+ $mail->add_to('sakura@cpan.tld', 'Sakura HARUNO');
 # with a display-name containing Japanese characters:
- $mail->add_dest('yuri@cpan.tld', '白百合ゆり');
+ $mail->add_to('yuri@cpan.tld', '白百合ゆり');
 
 # mail subject containing Japanese characters.
-$mail->set('Subject', '日本語で書かれた題名');
+$mail->subject('日本語で書かれた題名');
 # mail body    containing Japanese characters.
-$mail->set('Body'   , '日本語で書かれた本文。');
+$mail->body('日本語で書かれた本文。');
 
 # output the composed mail
-$mail->compose;
-my $got = $mail->output;
+my $got = $mail->compose;
 
 my $expected = <<'EOF';
 Date: Thu, 20 Mar 2003 15:21:18 +0900
-From:
+From: 
  "YAMADA, Taro"
  <taro@cpan.tld>
-To:
+To: 
  kaori@cpan.tld,
  "Sakura HARUNO"
  <sakura@cpan.tld>,
@@ -50,7 +49,7 @@ Subject:
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: 7bit
-X-Mailer: ISO2022JP.pm v0.05_03 (Mail::ISO2022JP http://www.cpan.org/)
+X-Mailer: ISO2022JP.pm v0.06 (Mail::ISO2022JP http://www.cpan.org/)
 
 $BF|K\8l$G=q$+$l$?K\J8!#(B
 EOF
@@ -61,30 +60,29 @@ is ( $got, $expected,
 ########################################################################
 # compose a long subject and body containing Japanese characters.
 my $mail_2 = Mail::ISO2022JP->new;
-$mail_2->set('Date', 'Thu, 20 Mar 2003 15:21:18 +0900');
-$mail_2->add_orig('taro@cpan.tld', 'YAMADA, Taro');
+$mail_2->date('Thu, 20 Mar 2003 15:21:18 +0900');
+$mail_2->add_from('taro@cpan.tld', 'YAMADA, Taro');
 
 # display-name is omitted:
- $mail_2->add_dest('kaori@cpan.tld');
+ $mail_2->add_to('kaori@cpan.tld');
 # with a display-name in the US-ASCII characters:
- $mail_2->add_dest('sakura@cpan.tld', 'Sakura HARUNO');
+ $mail_2->add_to('sakura@cpan.tld', 'Sakura HARUNO');
 # with a display-name containing Japanese characters:
- $mail_2->add_dest('yuri@cpan.tld', '白百合ゆり');
+ $mail_2->add_to('yuri@cpan.tld', '白百合ゆり');
 
 # mail subject containing Japanese characters.
-$mail_2->set('Subject', '日本語で書かれた題名。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
+$mail_2->subject('日本語で書かれた題名。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
 # mail body    containing Japanese characters.
-$mail_2->set('Body', '日本語で書かれた本文。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
+$mail_2->body('日本語で書かれた本文。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
 # output the composed mail
-$mail_2->compose;
-$got = $mail_2->output;
+$got = $mail_2->compose;
 
 $expected = <<'EOF';
 Date: Thu, 20 Mar 2003 15:21:18 +0900
-From:
+From: 
  "YAMADA, Taro"
  <taro@cpan.tld>
-To:
+To: 
  kaori@cpan.tld,
  "Sakura HARUNO"
  <sakura@cpan.tld>,
@@ -97,7 +95,7 @@ Subject:
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: 7bit
-X-Mailer: ISO2022JP.pm v0.05_03 (Mail::ISO2022JP http://www.cpan.org/)
+X-Mailer: ISO2022JP.pm v0.06 (Mail::ISO2022JP http://www.cpan.org/)
 
 $BF|K\8l$G=q$+$l$?K\J8!#$H$F$bD9$$!#D9$$D9$$$*OC!#$A$c$s$H%(%s%3!<%I$G$-$k$N$G$7$g$&$+!)(B
 EOF
@@ -108,30 +106,29 @@ is ( $got, $expected,
 ########################################################################
 # compose a long destination header containing Japanese characters.
 my $mail_3 = Mail::ISO2022JP->new;
-$mail_3->set('Date', 'Thu, 20 Mar 2003 15:21:18 +0900');
-$mail_3->add_orig('taro@cpan.tld', 'YAMADA, Taro');
+$mail_3->date('Thu, 20 Mar 2003 15:21:18 +0900');
+$mail_3->add_from('taro@cpan.tld', 'YAMADA, Taro');
 
 # with a display-name in the US-ASCII characters:
- $mail_3->add_dest('kaori@cpan.tld', 'RARARARARARARARARARARARARARARARARARARARA RARARARARARARARARARARARARARARARARARARARA');
+ $mail_3->add_to('kaori@cpan.tld', 'RARARARARARARARARARARARARARARARARARARARA RARARARARARARARARARARARARARARARARARARARA');
 # with a display-name in the US-ASCII characters:
- $mail_3->add_dest('sakura@cpan.tld', 'RARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARA');
+ $mail_3->add_to('sakura@cpan.tld', 'RARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARA');
 # with a display-name containing Japanese characters:
- $mail_3->add_dest('yuri@cpan.tld', '日本語で書かれた名前。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
+ $mail_3->add_to('yuri@cpan.tld', '日本語で書かれた名前。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
 
 # mail subject containing Japanese characters.
-$mail_3->set('Subject', '日本語で書かれた題名。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
+$mail_3->subject('日本語で書かれた題名。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
 # mail body    containing Japanese characters.
-$mail_3->set('Body', '日本語で書かれた本文。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
+$mail_3->body('日本語で書かれた本文。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
 # output the composed mail
-$mail_3->compose;
-$got = $mail_3->output;
+$got = $mail_3->compose;
 
 $expected = <<'EOF';
 Date: Thu, 20 Mar 2003 15:21:18 +0900
-From:
+From: 
  "YAMADA, Taro"
  <taro@cpan.tld>
-To:
+To: 
  RARARARARARARARARARARARARARARARARARARARA
  RARARARARARARARARARARARARARARARARARARARA
  <kaori@cpan.tld>,
@@ -149,7 +146,7 @@ Subject:
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: 7bit
-X-Mailer: ISO2022JP.pm v0.05_03 (Mail::ISO2022JP http://www.cpan.org/)
+X-Mailer: ISO2022JP.pm v0.06 (Mail::ISO2022JP http://www.cpan.org/)
 
 $BF|K\8l$G=q$+$l$?K\J8!#$H$F$bD9$$!#D9$$D9$$$*OC!#$A$c$s$H%(%s%3!<%I$G$-$k$N$G$7$g$&$+!)(B
 EOF
@@ -160,51 +157,50 @@ is ( $got, $expected,
 ########################################################################
 # compose a long various header containing Japanese characters.
 my $mail_4 = Mail::ISO2022JP->new;
-$mail_4->set('Date', 'Thu, 20 Mar 2003 15:21:18 +0900');
-$mail_4->add_orig('taro@cpan.tld', 'YAMADA, Taro');
-$mail_4->add_orig('ken@cpan.tld');
-$mail_4->add_orig('masaru@cpan.tld', '勝');
+$mail_4->date('Thu, 20 Mar 2003 15:21:18 +0900');
+$mail_4->add_from('taro@cpan.tld', 'YAMADA, Taro');
+$mail_4->add_from('ken@cpan.tld');
+$mail_4->add_from('masaru@cpan.tld', '勝');
 $mail_4->sender('taka@cpan.tld', 'チャンピオン鷹');
 $mail_4->add_reply('taro@cpan-jp.tld', 'YAMADA, Taro');
 $mail_4->add_reply('ken@cpan-jp.tld');
 $mail_4->add_reply('masaru@cpan-jp.tld', '勝');
 
-$mail_4->add_dest('kaori@cpan.tld', 'RARARARARARARARARARARARARARARARARARARARA RARARARARARARARARARARARARARARARARARARARA');
-$mail_4->add_dest('sakura@cpan.tld', 'RARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARA');
-$mail_4->add_dest('yuri@cpan.tld', '日本語で書かれた名前。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
-$mail_4->add_dest_cc('kaori@cpan-jp.tld', 'RARARARARARARARARARARARARARARARARARARARA RARARARARARARARARARARARARARARARARARARARA');
-$mail_4->add_dest_cc('sakura@cpan-jp.tld', 'RARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARA');
-$mail_4->add_dest_cc('yuri@cpan-jp.tld', '日本語で書かれた名前。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
-$mail_4->add_dest_bcc('kaori@cpan-saitama.tld', 'RARARARARARARARARARARARARARARARARARARARA RARARARARARARARARARARARARARARARARARARARA');
-$mail_4->add_dest_bcc('sakura@cpan-saitama.tld', 'RARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARA');
-$mail_4->add_dest_bcc('yuri@cpan-saitama.tld', '日本語で書かれた名前。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
+$mail_4->add_to('kaori@cpan.tld', 'RARARARARARARARARARARARARARARARARARARARA RARARARARARARARARARARARARARARARARARARARA');
+$mail_4->add_to('sakura@cpan.tld', 'RARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARA');
+$mail_4->add_to('yuri@cpan.tld', '日本語で書かれた名前。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
+$mail_4->add_cc('kaori@cpan-jp.tld', 'RARARARARARARARARARARARARARARARARARARARA RARARARARARARARARARARARARARARARARARARARA');
+$mail_4->add_cc('sakura@cpan-jp.tld', 'RARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARA');
+$mail_4->add_cc('yuri@cpan-jp.tld', '日本語で書かれた名前。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
+$mail_4->add_bcc('kaori@cpan-saitama.tld', 'RARARARARARARARARARARARARARARARARARARARA RARARARARARARARARARARARARARARARARARARARA');
+$mail_4->add_bcc('sakura@cpan-saitama.tld', 'RARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARA');
+$mail_4->add_bcc('yuri@cpan-saitama.tld', '日本語で書かれた名前。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
 
 # mail subject containing Japanese characters.
-$mail_4->set('Subject', '日本語で書かれた題名。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
+$mail_4->subject('日本語で書かれた題名。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
 # mail body    containing Japanese characters.
-$mail_4->set('Body', '日本語で書かれた本文。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
+$mail_4->body('日本語で書かれた本文。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
 # output the composed mail
-$mail_4->compose;
-$got = $mail_4->output;
+$got = $mail_4->compose;
 
 $expected = <<'EOF';
 Date: Thu, 20 Mar 2003 15:21:18 +0900
-From:
+From: 
  "YAMADA, Taro"
  <taro@cpan.tld>,
  ken@cpan.tld,
  =?ISO-2022-JP?B?GyRCPiEbKEI=?=
  <masaru@cpan.tld>
-Sender:
+Sender: 
  =?ISO-2022-JP?B?GyRCJUElYyVzJVQlKiVzQmsbKEI=?=
  <taka@cpan.tld>
-Reply-To:
+Reply-To: 
  "YAMADA, Taro"
  <taro@cpan-jp.tld>,
  ken@cpan-jp.tld,
  =?ISO-2022-JP?B?GyRCPiEbKEI=?=
  <masaru@cpan-jp.tld>
-To:
+To: 
  RARARARARARARARARARARARARARARARARARARARA
  RARARARARARARARARARARARARARARARARARARARA
  <kaori@cpan.tld>,
@@ -215,7 +211,7 @@ To:
  =?ISO-2022-JP?B?GyRCJCREOSQkJCpPQyEjJEEkYyRzJEglKCVzJTMhPCVJJEckLSRrGyhC?=
  =?ISO-2022-JP?B?GyRCJE4kRyQ3JGckJiQrISkbKEI=?=
  <yuri@cpan.tld>
-Cc:
+Cc: 
  RARARARARARARARARARARARARARARARARARARARA
  RARARARARARARARARARARARARARARARARARARARA
  <kaori@cpan-jp.tld>,
@@ -226,7 +222,7 @@ Cc:
  =?ISO-2022-JP?B?GyRCJCREOSQkJCpPQyEjJEEkYyRzJEglKCVzJTMhPCVJJEckLSRrGyhC?=
  =?ISO-2022-JP?B?GyRCJE4kRyQ3JGckJiQrISkbKEI=?=
  <yuri@cpan-jp.tld>
-Bcc:
+Bcc: 
  RARARARARARARARARARARARARARARARARARARARA
  RARARARARARARARARARARARARARARARARARARARA
  <kaori@cpan-saitama.tld>,
@@ -244,7 +240,7 @@ Subject:
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: 7bit
-X-Mailer: ISO2022JP.pm v0.05_03 (Mail::ISO2022JP http://www.cpan.org/)
+X-Mailer: ISO2022JP.pm v0.06 (Mail::ISO2022JP http://www.cpan.org/)
 
 $BF|K\8l$G=q$+$l$?K\J8!#$H$F$bD9$$!#D9$$D9$$$*OC!#$A$c$s$H%(%s%3!<%I$G$-$k$N$G$7$g$&$+!)(B
 EOF

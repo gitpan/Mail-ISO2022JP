@@ -1,5 +1,9 @@
 Revision history for Perl extension Mail::ISO2022JP.
 
+0.06  2003-04-01 12:21:11
+	- the final release
+	- deprecated by Lingua::JA::Mail
+
 0.05  2003-03-25 02:41:32
 	- a serious bug about MIME encoding had been still remained and which
 	  has fixed (thanks to Koichi TANIGUCHI for the suggestions!)

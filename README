@@ -1,7 +1,13 @@
-Mail/ISO2022JP version 0.05
+Mail/ISO2022JP version 0.06 (Final)
 ===========================
 
  This module composes a ISO-2022-JP encoded email.
+
+**DEPRECATED**
+
+ This module has moved to the namespace of Lingua::JA::Mail.
+ So this module will be no more maintenanced.
+ Please see its successor Lingua::JA::Mail.
 
 INSTALLATION
 

@@ -10,7 +10,7 @@ WriteMakefile(
 		'MIME::Base64' => '2.12',
 	},
 	($] >= 5.005 ? (
-		'ABSTRACT' => 'compose ISO-2022-JP encoded email',
+		'ABSTRACT' => '**DEPRECATED** compose ISO-2022-JP encoded email',
 		'AUTHOR'   => 'Masanori HATA <lovewing@geocities.co.jp>',
 	) : ()),
 );
