@@ -50,7 +50,7 @@ Subject:
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: 7bit
-X-Mailer: ISO2022JP.pm v0.05_02 (Mail::ISO2022JP http://www.cpan.org/)
+X-Mailer: ISO2022JP.pm v0.05_03 (Mail::ISO2022JP http://www.cpan.org/)
 
 日本語で書かれた本文。
 EOF
@@ -97,7 +97,7 @@ Subject:
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: 7bit
-X-Mailer: ISO2022JP.pm v0.05_02 (Mail::ISO2022JP http://www.cpan.org/)
+X-Mailer: ISO2022JP.pm v0.05_03 (Mail::ISO2022JP http://www.cpan.org/)
 
 日本語で書かれた本文。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？
 EOF
@@ -149,7 +149,7 @@ Subject:
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: 7bit
-X-Mailer: ISO2022JP.pm v0.05_02 (Mail::ISO2022JP http://www.cpan.org/)
+X-Mailer: ISO2022JP.pm v0.05_03 (Mail::ISO2022JP http://www.cpan.org/)
 
 日本語で書かれた本文。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？
 EOF
@@ -244,7 +244,7 @@ Subject:
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: 7bit
-X-Mailer: ISO2022JP.pm v0.05_02 (Mail::ISO2022JP http://www.cpan.org/)
+X-Mailer: ISO2022JP.pm v0.05_03 (Mail::ISO2022JP http://www.cpan.org/)
 
 日本語で書かれた本文。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？
 EOF

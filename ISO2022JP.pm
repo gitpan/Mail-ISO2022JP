@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.05_02'; # 2003-03-26
+our $VERSION = '0.05_03'; # 2003-03-30
 
 use Encode;
 use MIME::Base64;
@@ -326,7 +326,7 @@ sub _check_if_contain_japanese {
 	my ($string) = @_;
 	
 	$string = decode('utf8', $string);
-	$string =~ s/\n//g; # ignore line-break
+	$string =~ tr/\n//d; # ignore line-break
 	return $string =~
 		tr/\x01-\x08\x0B\x0C\x0E-\x1F\x7F\x21\x23-\x5B\x5D-\x7E\x20//c;
 	# this tr/// checks if there is other than qtext characters or SPACE.
@@ -447,7 +447,7 @@ sub _encoded_text {
 	
 	foreach my $text (@text) {
 		$text = encode_base64($text);
-		$text =~ s/\n//g;
+		$text =~ tr/\n//d;
 	}
 	
 	return @text;
