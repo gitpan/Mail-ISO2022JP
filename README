@@ -1,4 +1,4 @@
-Mail/ISO2022JP version 0.04
+Mail/ISO2022JP version 0.05
 ===========================
 
  This module composes a ISO-2022-JP encoded email.

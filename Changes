@@ -1,8 +1,9 @@
 Revision history for Perl extension Mail::ISO2022JP.
 
-0.05  
-	- a serious bug about MIME encoding had been still remained
-	  (thanks to Koichi TANIGUCHI for the suggestions!) has fixed.
+0.05  2003-03-25 02:41:32
+	- a serious bug about MIME encoding had been still remained and which
+	  has fixed (thanks to Koichi TANIGUCHI for the suggestions!)
+	- some other headers are implemented
 
 0.04  2003-03-12 00:03:27
 	- a serious bug about that folding line at the header field had
