@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.05'; # 2003-03-25
+our $VERSION = '0.05_01'; # 2003-03-25
 
 use Encode;
 use MIME::Base64;
@@ -606,7 +606,7 @@ Mail::ISO2022JP - compose ISO-2022-JP encoded email
 
 =head1 DESCRIPTION
 
-This module is produced mainly for Japanese Perl programmers those who wants to compose an email via Perl extention.
+This module is produced mainly for Japanese Perl programmers those who wants to compose an email with Perl extention.
 
 For some reasons, most Japanese internet users have chosen ISO-2022-JP 7bit character encoding for email rather than the other 8bit encodings (eg. EUC-JP, Shift_JIS).
 

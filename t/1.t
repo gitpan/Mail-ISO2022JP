@@ -50,7 +50,7 @@ Subject:
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: base64
-X-Mailer: ISO2022JP.pm v0.05 (Mail::ISO2022JP http://www.cpan.org/)
+X-Mailer: ISO2022JP.pm v0.05_01 (Mail::ISO2022JP http://www.cpan.org/)
 
 GyRCRnxLXDhsJEc9cSQrJGwkP0tcSjghIxsoQg==
 
@@ -98,7 +98,7 @@ Subject:
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: base64
-X-Mailer: ISO2022JP.pm v0.05 (Mail::ISO2022JP http://www.cpan.org/)
+X-Mailer: ISO2022JP.pm v0.05_01 (Mail::ISO2022JP http://www.cpan.org/)
 
 GyRCRnxLXDhsJEc9cSQrJGwkP0tcSjghIyRIJEYkYkQ5JCQhI0Q5JCREOSQkJCpPQyEjJEEkYyRz
 JEglKCVzJTMhPCVJJEckLSRrJE4kRyQ3JGckJiQrISkbKEI=
@@ -152,7 +152,7 @@ Subject:
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: base64
-X-Mailer: ISO2022JP.pm v0.05 (Mail::ISO2022JP http://www.cpan.org/)
+X-Mailer: ISO2022JP.pm v0.05_01 (Mail::ISO2022JP http://www.cpan.org/)
 
 GyRCRnxLXDhsJEc9cSQrJGwkP0tcSjghIyRIJEYkYkQ5JCQhI0Q5JCREOSQkJCpPQyEjJEEkYyRz
 JEglKCVzJTMhPCVJJEckLSRrJE4kRyQ3JGckJiQrISkbKEI=
@@ -249,7 +249,7 @@ Subject:
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: base64
-X-Mailer: ISO2022JP.pm v0.05 (Mail::ISO2022JP http://www.cpan.org/)
+X-Mailer: ISO2022JP.pm v0.05_01 (Mail::ISO2022JP http://www.cpan.org/)
 
 GyRCRnxLXDhsJEc9cSQrJGwkP0tcSjghIyRIJEYkYkQ5JCQhI0Q5JCREOSQkJCpPQyEjJEEkYyRz
 JEglKCVzJTMhPCVJJEckLSRrJE4kRyQ3JGckJiQrISkbKEI=
