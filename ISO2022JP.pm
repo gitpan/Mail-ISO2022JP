@@ -4,7 +4,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '0.02'; # 2003-03-10
+our $VERSION = '0.03'; # 2003-03-11
 
 use Carp;
 
@@ -114,7 +114,7 @@ $sender_address and $recipient_address should be valid as email address. $sender
 
 =item date($date_string)
 
-Specifies mail origination date. This method must used before compose() method when you want to specify this value. Of course, date format should be compliant to the format of RFC2822 specification. It is like blow:
+Specifies mail origination date. This method must used before compose() method when you want to specify this value. Of course, date-time format should be compliant to the format of RFC2822 specification. It is like blow:
      
  Mon, 10 Mar 2003 18:48:06 +0900
 
@@ -142,6 +142,14 @@ Specifies sendmail location. ex. '/usr/bin/sendmail'
 =item L<Encode>
 
 =item L<MIME::Base64>
+
+=item RFC2045: L<http://www.ietf.org/rfc/rfc2045.txt> (MIME)
+
+=item RFC2046: L<http://www.ietf.org/rfc/rfc2046.txt> (MIME)
+
+=item RFC2047: L<http://www.ietf.org/rfc/rfc2047.txt> (MIME)
+
+=item RFC2822: L<http://www.ietf.org/rfc/rfc2822.txt> (date-time)
 
 =back
 
