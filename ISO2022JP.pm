@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.04_03'; # 2003-03-20
+our $VERSION = '0.04_04'; # 2003-03-20
 
 use Encode;
 use MIME::Base64;
@@ -26,7 +26,8 @@ sub sendmail {
 
 sub post {
 	my ($self) = @_;
-	open(MAIL, "| $$self{'sendmail'} -t -i") or croak "Could not use sendmail program.\n";
+	open(MAIL, "| $$self{'sendmail'} -t -i")
+		or croak "Could not use sendmail program.\n";
 	print MAIL $$self{'mail'};
 	close MAIL;
 	return $self;
@@ -57,7 +58,7 @@ sub compose {
 	my @subject = encoded($subject);
 	$body = encode('iso-2022-jp', $body);
 	
-	my $mail = <<"EOF";
+	$$self{'mail'} = <<"EOF";
 From: $$self{'From_addr'}
 To: $$self{'To_addr'}
 Subject: @subject
@@ -67,11 +68,11 @@ Content-Transfer-Encoding: 7bit
 
 $body
 EOF
-return $mail;
-#	if ($$self{'time'}) {
-#		$$self{'mail'} = "Date: $$self{'time'}\n$$self{'mail'}";
-#	}
-#	return $self;
+	if ($$self{'Date'}) {
+		$$self{'mail'} = "Date: $$self{'Date'}\n$$self{'mail'}";
+	}
+	
+	return $self;
 }
 
 ########################################################################
@@ -195,8 +196,10 @@ Mail::ISO2022JP - compose ISO-2022-JP encoded email
   $mail->set('Subject'  , 'Subject_Containing_Japanese_Characters');
   # mail body    containing Japanese characters.
   $mail->set('Body'     , 'Body_Containing_Japanese_Characters');
+  # compose
+  $mail->compose;
   # output the composed mail
-  print $mail->compose;
+  print $mail->output;
 
 =head1 DESCRIPTION
 
@@ -220,33 +223,33 @@ Creates a new object.
 
 =item set('From_addr', $address)
 
-To set originator address. $address should be valid as email address.
+Specify the originator address. $address should be valid as email address.
 
 =item set('To_addr', $address)
 
-To set destination address. $address should be valid as email address. Comma separated multiple destination addresses are also usable.
+Specify the destination address(es). $address should be valid as email address. Comma-separated list of multiple destination addresses are also usable.
 
 =item set('Subject', $subject)
 
-To set mail subject. $subject can contain Japanese characters. Note that this module runs under Unicode/UTF-8 environment, you should input these data in UTF-8 character encoding.
+Specify the mail subject. $subject can contain Japanese characters. Note that this module runs under Unicode/UTF-8 environment, you should input these data in UTF-8 character encoding.
 
 =item set('Body', $body)
 
-To set mail body. $body can contain Japanese characters. Note that this module runs under Unicode/UTF-8 environment, you should input these data in UTF-8 character encoding.
+Specify the mail body. $body can contain Japanese characters. Note that this module runs under Unicode/UTF-8 environment, you should input these data in UTF-8 character encoding.
 
-=item compose
+=item set('Date', $date)
 
-Compose and output a formed email.
-
-=item date($date_string)
-
-Specifies mail origination date. This method must used before compose() method when you want to specify this value. Of course, date-time format should be compliant to the format of RFC2822 specification. It is like blow:
+Specify the mail origination date. Note that date-time format should be compliant to the format of RFC2822 specification. It is like blow:
      
  Mon, 10 Mar 2003 18:48:06 +0900
 
-Origination date is not a essential information for email (sendmail program will add automatically on posting). Don't forget to quote the string.
+Don't forget to quote the string. If you don't specify date, sendmail program may add automatically on posting. 
 
-=item post() *EXPERIMENTAL*
+=item compose
+
+Compose a formed email.
+
+=item post *EXPERIMENTAL*
 
 Posts a mail using sendmail program.
 At the default setting, it is supposed that sendmail program's name is `sendmail' under the systems's PATH environmental variable. You can specify exact location with sendmail() method.
