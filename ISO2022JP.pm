@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.05_01'; # 2003-03-25
+our $VERSION = '0.05_02'; # 2003-03-26
 
 use Encode;
 use MIME::Base64;
@@ -36,12 +36,6 @@ sub post {
 sub output {
 	my ($self) = @_;
 	return $$self{'mail'};
-}
-
-sub date {
-	my $self = shift;
-	$$self{'time'} = shift;
-	return $self;
 }
 
 sub set {
@@ -347,7 +341,7 @@ sub compose {
 	
 	my $subject = encoded_header( decode('utf8', $$self{'Subject'}) );
 	my $body = encode( 'iso-2022-jp', decode('utf8', $$self{'Body'}) );
-	$body = encode_base64($body);
+#	$body = encode_base64($body);
 	
 	if ($$self{'Sender'}) {
 		$$self{'Sender'} = "\nSender:\n $$self{'Sender'}";
@@ -383,7 +377,7 @@ Subject:
  $subject
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: 7bit
 X-Mailer: ISO2022JP.pm v$VERSION (Mail::ISO2022JP http://www.cpan.org/)
 
 $body
@@ -397,10 +391,10 @@ EOF
 
 ########################################################################
 
-# RFC2822 describes about a line length
+# RFC2822 describes about the length of a line
 # Max: 998 = 1000 - (CR + LF)
 # Rec:  76 =   78 - (CR + LF)
-# RFC2047 describes about an encoded-word length
+# RFC2047 describes about the length of an encoded-word
 # Max:  75 =   76 - SPACE
 
 sub encoded_header {
@@ -414,14 +408,14 @@ sub encoded_header {
 
 # an encoded-word is composed of
 # 'charset', 'encoding', 'encoded-text' and delimiters.
-# Hence an encoded-text's max length is:
+# Hence the max length of an encoded-text is:
 # 75 - ('charset', 'encoding' and delimiters)
 # 
 # charset 'ISO-2022-JP' is 11.
 # encoding 'B' is 1.
 # delimiters '=?', '?', '?' and '?=' is total 6.
 # 75 - (11 + 1 + 6) = 57
-# It is said that an encoded-text's max length is 57
+# It is said that the max length of an encoded-text is 57
 # when we use ISO-2022-JP B encoding.
 
 sub _encoded_word {
@@ -660,7 +654,7 @@ Specify the mail subject. $subject can contain Japanese characters. Note that th
 
 Specify the mail body. $body can contain Japanese characters. Note that this module runs under Unicode/UTF-8 environment, you should input these data in UTF-8 character encoding.
 
-Note: For the purpose to free from the rule that enforce user to line fold, though ISO-2022-JP is a 7bit encoding, body text is encoded again with Base64 internally.
+Note: RFC1468 describes about a line should be tried to keep length within 80 display columns. Then each JIS X 0208 character takes two columns, and the escape sequences do not take any. 
 
 =item set('Date', $date)
 
@@ -696,6 +690,8 @@ Specifies sendmail location. ex. '/usr/bin/sendmail'
 =item RFC2046: L<http://www.ietf.org/rfc/rfc2046.txt> (MIME)
 
 =item RFC2047: L<http://www.ietf.org/rfc/rfc2047.txt> (MIME)
+
+=item RFC1468: L<http://www.ietf.org/rfc/rfc1468.txt> (ISO-2022-JP)
 
 =item Perl Module: L<MIME::Base64>
 

@@ -49,11 +49,10 @@ Subject:
  =?ISO-2022-JP?B?GyRCRnxLXDhsJEc9cSQrJGwkP0JqTD4bKEI=?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
-Content-Transfer-Encoding: base64
-X-Mailer: ISO2022JP.pm v0.05_01 (Mail::ISO2022JP http://www.cpan.org/)
+Content-Transfer-Encoding: 7bit
+X-Mailer: ISO2022JP.pm v0.05_02 (Mail::ISO2022JP http://www.cpan.org/)
 
-GyRCRnxLXDhsJEc9cSQrJGwkP0tcSjghIxsoQg==
-
+日本語で書かれた本文。
 EOF
 
 is ( $got, $expected,
@@ -97,12 +96,10 @@ Subject:
  =?ISO-2022-JP?B?GyRCJE4kRyQ3JGckJiQrISkbKEI=?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
-Content-Transfer-Encoding: base64
-X-Mailer: ISO2022JP.pm v0.05_01 (Mail::ISO2022JP http://www.cpan.org/)
+Content-Transfer-Encoding: 7bit
+X-Mailer: ISO2022JP.pm v0.05_02 (Mail::ISO2022JP http://www.cpan.org/)
 
-GyRCRnxLXDhsJEc9cSQrJGwkP0tcSjghIyRIJEYkYkQ5JCQhI0Q5JCREOSQkJCpPQyEjJEEkYyRz
-JEglKCVzJTMhPCVJJEckLSRrJE4kRyQ3JGckJiQrISkbKEI=
-
+日本語で書かれた本文。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？
 EOF
 
 is ( $got, $expected,
@@ -151,12 +148,10 @@ Subject:
  =?ISO-2022-JP?B?GyRCJE4kRyQ3JGckJiQrISkbKEI=?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
-Content-Transfer-Encoding: base64
-X-Mailer: ISO2022JP.pm v0.05_01 (Mail::ISO2022JP http://www.cpan.org/)
+Content-Transfer-Encoding: 7bit
+X-Mailer: ISO2022JP.pm v0.05_02 (Mail::ISO2022JP http://www.cpan.org/)
 
-GyRCRnxLXDhsJEc9cSQrJGwkP0tcSjghIyRIJEYkYkQ5JCQhI0Q5JCREOSQkJCpPQyEjJEEkYyRz
-JEglKCVzJTMhPCVJJEckLSRrJE4kRyQ3JGckJiQrISkbKEI=
-
+日本語で書かれた本文。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？
 EOF
 
 is ( $got, $expected,
@@ -248,12 +243,10 @@ Subject:
  =?ISO-2022-JP?B?GyRCJE4kRyQ3JGckJiQrISkbKEI=?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
-Content-Transfer-Encoding: base64
-X-Mailer: ISO2022JP.pm v0.05_01 (Mail::ISO2022JP http://www.cpan.org/)
+Content-Transfer-Encoding: 7bit
+X-Mailer: ISO2022JP.pm v0.05_02 (Mail::ISO2022JP http://www.cpan.org/)
 
-GyRCRnxLXDhsJEc9cSQrJGwkP0tcSjghIyRIJEYkYkQ5JCQhI0Q5JCREOSQkJCpPQyEjJEEkYyRz
-JEglKCVzJTMhPCVJJEckLSRrJE4kRyQ3JGckJiQrISkbKEI=
-
+日本語で書かれた本文。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？
 EOF
 
 is ( $got, $expected,
