@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.04_05'; # 2003-03-20
+our $VERSION = '0.04_06'; # 2003-03-20
 
 use Encode;
 use MIME::Base64;
@@ -50,22 +50,84 @@ sub set {
 	return $self;
 }
 
+sub add_dest {
+	my ($self, $addr_spec, $name) = @_;
+	
+	my $address;
+	if ($name) {
+		if ( _check_if_contain_japanese($name) ) {
+			my $name = encoded_header( decode('utf8', $name) );
+			$address = "$name\n <$addr_spec>";
+		}
+		else {
+			if ( length($name) <= 73) {
+				$address = "\"$name\"\n <$addr_spec>";
+			}
+            else {
+				my @name = split(/ /, $name);
+				my $too_long_word = 0;
+				foreach my $piece (@name) {
+					if ( length($piece) > 75 ) {
+						$too_long_word = 1;
+						last;
+					}
+				}
+				if ($too_long_word) {
+					$name = encoded_header_ascii($name);
+					$address = "$name\n <$addr_spec>";
+				}
+				else {
+					$name = join("\n ", @name);
+					$address = "$name\n <$addr_spec>";
+				}
+			}
+		}
+	}
+	else {
+		$address = $addr_spec;
+	}
+	
+	if ($$self{'To'}) {
+		$$self{'To'} = "$$self{'To'},\n $address";
+	}
+	else {
+		$$self{'To'} = $address;
+    }
+	
+	return $self;
+}
+
+sub _check_if_contain_japanese {
+	my ($string) = @_;
+	
+	$string = decode('utf8', $string);
+	$string =~ s/\n//g; # ignore line-break
+	return $string =~
+		tr/\x01-\x08\x0B\x0C\x0E-\x1F\x7F\x21\x23-\x5B\x5D-\x7E\x20//c;
+	# this tr/// checks if there is other than qtext characters or SPACE.
+	# from RFC2822:
+	# qtext = NO-WS-CTL / %d33 / %d35-91 / %d93-126
+	# qcontent = qtext / quoted-pair
+	# quoted-string = [CFWS] DQUOTE *([FWS] qcontent) [FWS] DQUOTE [CFWS]
+}
+
 sub compose {
 	my ($self) = @_;
 	
-	my $subject = decode('utf8', $$self{'Subject'});
-	my $body    = decode('utf8', $$self{'Body'   });
-	my @subject = encoded($subject);
-	$body = encode('iso-2022-jp', $body);
+	my $subject = encoded_header( decode('utf8', $$self{'Subject'}) );
+	my $body = encode( 'iso-2022-jp', decode('utf8', $$self{'Body'}) );
 	$body = encode_base64($body);
 	
 	$$self{'mail'} = <<"EOF";
 From: $$self{'From_addr'}
-To: $$self{'To_addr'}
-Subject: @subject
+To:
+ $$self{'To'}
+Subject: 
+ $subject
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: base64
+X-Mailer: ISO2022JP.pm v$VERSION (Mail::ISO2022JP http://www.cpan.org/)
 
 $body
 EOF
@@ -84,24 +146,20 @@ EOF
 # RFC2047 describes about an encoded-word length
 # Max:  75 =   76 - SPACE
 
-sub encoded {
+sub encoded_header {
 	my ($string) = @_;
 	
 	my @lines = _encoded_word($string);
 	
-	foreach my $line (@lines) {
-		$line = "\n $line";
-	}
-#	$lines[$#lines] = "$lines[$#lines]\n ";
-	
-	return @lines;
+	my $line = join("\n ", @lines);
+	return $line;
 }
 
 # an encoded-word is composed of
 # 'charset', 'encoding', 'encoded-text' and delimiters.
 # Hence an encoded-text's max length is:
 # 75 - ('charset', 'encoding' and delimiters)
-#
+# 
 # charset 'ISO-2022-JP' is 11.
 # encoding 'B' is 1.
 # delimiters '=?', '?', '?' and '?=' is total 6.
@@ -178,6 +236,83 @@ sub _cut_once {
 		}
 	}
 }
+########################################################################
+sub encoded_header_ascii {
+	my ($string) = @_;
+	
+	my @lines = _encoded_word_q($string);
+	
+	my $line = join("\n ", @lines);
+	return $line;
+}
+
+sub _encoded_word_q {
+	my ($string) = @_;
+	
+	my @words = _encoded_text_q($string);
+	
+	foreach my $word (@words) {
+		$word = "=?US-ASCII?Q?$word?=";
+	}
+	
+	return @words;
+}
+
+sub _encoded_text_q {
+	my ($string) = @_;
+	
+	my @text = _split_q($string);
+	
+	foreach my $text (@text) {
+		$text = encode_q($text);
+	}
+	
+	return @text;
+}
+
+sub _split_q {
+	my ($string) = @_;
+	
+	my @strings;
+	while ($string) {
+		(my $piece, $string) = _cut_once_q($string);
+		push(@strings, $piece);
+	}
+	
+	return @strings;
+}
+
+sub _cut_once_q {
+	my ($string) = @_;
+	
+	my $whole = encode_q($string);
+	if ( length($whole) <= 60 ) {
+		return $string;
+		last;
+	}
+	
+	my $letters = length($string);
+	for (my $i = 1; $i <= $letters; $i++) {
+		my $temp = substr($string, 0, $i);
+		$temp = encode_q($temp);
+		if (length($temp) > 60) {
+			my $piece = substr($string, 0, $i - 1);
+			my $rest  = substr($string, $i - 1);
+			return ($piece, $rest);
+			last;
+		}
+	}
+}
+
+sub encode_q {
+	my ($string) = @_;
+	
+	$string =~
+		s/([^\x21\x23-\x3C\x3E\x40-\x5B\x5D\x5E\x60-\x7E])/uc sprintf("=%02x", ord($1))/eg;
+	
+	return $string;
+}
+
 
 1;
 __END__
@@ -188,18 +323,28 @@ Mail::ISO2022JP - compose ISO-2022-JP encoded email
 
 =head1 SYNOPSIS
 
-  use Mail::ISO2022JP;
-  
-  $mail = Mail::ISO2022JP->new;
-  $mail->set('From_addr', 'taro@cpan.tld');
-  $mail->set('To_addr'  , 'sakura@cpan.tld, yuri@cpan.tld');
-  # mail subject containing Japanese characters.
-  $mail->set('Subject'  , 'Subject_Containing_Japanese_Characters');
-  # mail body    containing Japanese characters.
-  $mail->set('Body'     , 'Body_Containing_Japanese_Characters');
-  # compose
+ use Mail::ISO2022JP;
+ 
+ $mail = Mail::ISO2022JP->new;
+ 
+ $mail->set('From_addr', 'taro@cpan.tld');
+ 
+ # display-name is omitted:
+  $mail->add_dest('kaori@cpan.tld');
+ # with a display-name in the US-ASCII characters:
+  $mail->add_dest('sakura@cpan.tld', 'Sakura HARUNO');
+ # with a display-name containing Japanese characters:
+  $mail->add_dest('yuri@cpan.tld', 'NAME CONTAINING JAPANESE CHARS');
+ 
+ # mail subject containing Japanese characters:
+  $mail->set('Subject', 'SUBJECT CONTAINING JAPANESE CHARS');
+ 
+ # mail body    containing Japanese characters:
+  $mail->set('Body'   , 'BODY CONTAINING JAPANESE CHARS');
+ 
+ # compose
   $mail->compose;
-  # output the composed mail
+ # output the composed mail
   print $mail->output;
 
 =head1 DESCRIPTION
@@ -210,7 +355,7 @@ For some reasons, most Japanese internet users have chosen ISO-2022-JP 7bit char
 
 We can use ISO-2022-JP encoded Japanese text as message body safely in an email.
 
-But we should not use ISO-2022-JP encoded Japanese text as a header. We should escape some reserved 'special' characters before composing a header. To enable it, we encode ISO-2022-JP encoded Japanese text with MIME Base64 encoding. Thus MIME Base64 encoded ISO-2022-JP encoded Japanese text is safely using in a mail header.
+But we should not use ISO-2022-JP encoded Japanese text as a header. We should escape some reserved C<special> characters before composing a header. To enable it, we encode ISO-2022-JP encoded Japanese text with MIME Base64 encoding. Thus MIME Base64 encoded ISO-2022-JP encoded Japanese text is safely using in a mail header.
 
 This module has developed to intend to automate those kinds of operations.
 
@@ -226,9 +371,13 @@ Creates a new object.
 
 Specify the originator address. $address should be valid as email address.
 
-=item set('To_addr', $address)
+=item add_dest($addr_spec [, $display_name])
 
-Specify the destination address(es). $address should be valid as email address. Comma-separated list of multiple destination addresses are also usable.
+This method specifies a destination address. The $addr_spec must be valid as an C<addr-spec> in the RFC2822 specification. Be careful, an C<addr-spec> doesn't include the surrounding tokens "<" and ">" (angles).
+
+The $display_name is optional value. It must be valid as an C<display-name> in the RFC2822 specification. It can contain Japanese characters and then it will be encoded with 'B' encoding. When it contains only US-ASCII characters, it will not normaly be encoded. But in the rare case, it might be encoded with 'Q' encoding to shorten line length less than 76 characters (excluding CR LF).
+
+You can use repeatedly this method as much as you wish to specify more than one address.
 
 =item set('Subject', $subject)
 
@@ -267,10 +416,6 @@ Specifies sendmail location. ex. '/usr/bin/sendmail'
 
 =over
 
-=item L<Encode>
-
-=item L<MIME::Base64>
-
 =item RFC2822: L<http://www.ietf.org/rfc/rfc2822.txt> (Mail)
 
 =item RFC2045: L<http://www.ietf.org/rfc/rfc2045.txt> (MIME)
@@ -278,6 +423,10 @@ Specifies sendmail location. ex. '/usr/bin/sendmail'
 =item RFC2046: L<http://www.ietf.org/rfc/rfc2046.txt> (MIME)
 
 =item RFC2047: L<http://www.ietf.org/rfc/rfc2047.txt> (MIME)
+
+=item Perl Module: L<MIME::Base64>
+
+=item Perl Module: L<Encode>
 
 =back
 
@@ -289,7 +438,15 @@ This module runs under Unicode/UTF-8 environment (then Perl5.8 or later is requi
 
 =over
 
-=item enable originator/destination name containing Japanese characters.
+=item enable originator name contains Japanese characters.
+
+=back
+
+=head1 THANKS TO:
+
+=over
+
+=item Koichi TANIGUCHI for the suggestions.
 
 =back
 

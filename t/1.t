@@ -4,7 +4,10 @@
 # this code is written in Unicode/UTF-8 character-set
 # including Japanese letters.
 
-use Test::More tests => 4;
+use strict;
+use warnings;
+
+use Test::More tests => 5;
 
 BEGIN { use_ok('Mail::ISO2022JP') };
 
@@ -14,7 +17,14 @@ isa_ok( $mail, 'Mail::ISO2022JP' );
 # compose a mail containing Japanese characters.
 $mail->set('Date'     , 'Thu, 20 Mar 2003 15:21:18 +0900');
 $mail->set('From_addr', 'taro@cpan.tld');
-$mail->set('To_addr'  , 'sakura@cpan.tld, yuri@cpan.tld');
+
+# display-name is omitted:
+ $mail->add_dest('kaori@cpan.tld');
+# with a display-name in the US-ASCII characters:
+ $mail->add_dest('sakura@cpan.tld', 'Sakura HARUNO');
+# with a display-name containing Japanese characters:
+ $mail->add_dest('yuri@cpan.tld', '白百合ゆり');
+
 # mail subject containing Japanese characters.
 $mail->set('Subject'  , '日本語で書かれた題名');
 # mail body    containing Japanese characters.
@@ -26,43 +36,64 @@ my $got = $mail->output;
 my $expected = <<'EOF';
 Date: Thu, 20 Mar 2003 15:21:18 +0900
 From: taro@cpan.tld
-To: sakura@cpan.tld, yuri@cpan.tld
+To:
+ kaori@cpan.tld,
+ "Sakura HARUNO"
+ <sakura@cpan.tld>,
+ =?ISO-2022-JP?B?GyRCR3JJNDlnJGYkahsoQg==?=
+ <yuri@cpan.tld>
 Subject: 
  =?ISO-2022-JP?B?GyRCRnxLXDhsJEc9cSQrJGwkP0JqTD4bKEI=?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: base64
+X-Mailer: ISO2022JP.pm v0.04_06 (Mail::ISO2022JP http://www.cpan.org/)
 
 GyRCRnxLXDhsJEc9cSQrJGwkP0tcSjghIxsoQg==
 
 EOF
 
 is ( $got, $expected,
-	'composing a ISO-2022-JP encoded mail with MIME Base64 encoded headers');
+	'composing a ISO-2022-JP encoded mail with some encoded headers');
 
-# compose a long header mail containing Japanese characters.
-$mail->set('Date'     , 'Thu, 20 Mar 2003 15:21:18 +0900');
-$mail->set('From_addr', 'taro@cpan.tld');
-$mail->set('To_addr'  , 'sakura@cpan.tld, yuri@cpan.tld');
+########################################################################
+# compose a long subject and body containing Japanese characters.
+my $mail_2 = Mail::ISO2022JP->new;
+$mail_2->set('Date'     , 'Thu, 20 Mar 2003 15:21:18 +0900');
+$mail_2->set('From_addr', 'taro@cpan.tld');
+
+# display-name is omitted:
+ $mail_2->add_dest('kaori@cpan.tld');
+# with a display-name in the US-ASCII characters:
+ $mail_2->add_dest('sakura@cpan.tld', 'Sakura HARUNO');
+# with a display-name containing Japanese characters:
+ $mail_2->add_dest('yuri@cpan.tld', '白百合ゆり');
+
 # mail subject containing Japanese characters.
-$mail->set('Subject'  , '日本語で書かれた題名。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
+$mail_2->set('Subject'  , '日本語で書かれた題名。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
 # mail body    containing Japanese characters.
-$mail->set('Body'     , '日本語で書かれた本文。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
+$mail_2->set('Body'     , '日本語で書かれた本文。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
 # output the composed mail
-$mail->compose;
-my $got = $mail->output;
+$mail_2->compose;
+$got = $mail_2->output;
 
 $expected = <<'EOF';
 Date: Thu, 20 Mar 2003 15:21:18 +0900
 From: taro@cpan.tld
-To: sakura@cpan.tld, yuri@cpan.tld
+To:
+ kaori@cpan.tld,
+ "Sakura HARUNO"
+ <sakura@cpan.tld>,
+ =?ISO-2022-JP?B?GyRCR3JJNDlnJGYkahsoQg==?=
+ <yuri@cpan.tld>
 Subject: 
- =?ISO-2022-JP?B?GyRCRnxLXDhsJEc9cSQrJGwkP0JqTD4hIyRIJEYkYkQ5JCQhI0Q5GyhC?= 
- =?ISO-2022-JP?B?GyRCJCREOSQkJCpPQyEjJEEkYyRzJEglKCVzJTMhPCVJJEckLSRrGyhC?= 
+ =?ISO-2022-JP?B?GyRCRnxLXDhsJEc9cSQrJGwkP0JqTD4hIyRIJEYkYkQ5JCQhI0Q5GyhC?=
+ =?ISO-2022-JP?B?GyRCJCREOSQkJCpPQyEjJEEkYyRzJEglKCVzJTMhPCVJJEckLSRrGyhC?=
  =?ISO-2022-JP?B?GyRCJE4kRyQ3JGckJiQrISkbKEI=?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: base64
+X-Mailer: ISO2022JP.pm v0.04_06 (Mail::ISO2022JP http://www.cpan.org/)
 
 GyRCRnxLXDhsJEc9cSQrJGwkP0tcSjghIyRIJEYkYkQ5JCQhI0Q5JCREOSQkJCpPQyEjJEEkYyRz
 JEglKCVzJTMhPCVJJEckLSRrJE4kRyQ3JGckJiQrISkbKEI=
@@ -71,3 +102,55 @@ EOF
 
 is ( $got, $expected,
 	'same as above but with longer MIME Base64 encoded subject and body');
+
+########################################################################
+# compose a long destination header containing Japanese characters.
+my $mail_3 = Mail::ISO2022JP->new;
+$mail_3->set('Date'     , 'Thu, 20 Mar 2003 15:21:18 +0900');
+$mail_3->set('From_addr', 'taro@cpan.tld');
+
+# with a display-name in the US-ASCII characters:
+ $mail_3->add_dest('kaori@cpan.tld', 'RARARARARARARARARARARARARARARARARARARARA RARARARARARARARARARARARARARARARARARARARA');
+# with a display-name in the US-ASCII characters:
+ $mail_3->add_dest('sakura@cpan.tld', 'RARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARARA');
+# with a display-name containing Japanese characters:
+ $mail_3->add_dest('yuri@cpan.tld', '日本語で書かれた名前。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
+
+# mail subject containing Japanese characters.
+$mail_3->set('Subject'  , '日本語で書かれた題名。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
+# mail body    containing Japanese characters.
+$mail_3->set('Body'     , '日本語で書かれた本文。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
+# output the composed mail
+$mail_3->compose;
+$got = $mail_3->output;
+
+$expected = <<'EOF';
+Date: Thu, 20 Mar 2003 15:21:18 +0900
+From: taro@cpan.tld
+To:
+ RARARARARARARARARARARARARARARARARARARARA
+ RARARARARARARARARARARARARARARARARARARARA
+ <kaori@cpan.tld>,
+ =?US-ASCII?Q?RARARARARARARARARARARARARARARARARARARARARARARARARARARARARARA?=
+ =?US-ASCII?Q?RARARARARARARARARARA?=
+ <sakura@cpan.tld>,
+ =?ISO-2022-JP?B?GyRCRnxLXDhsJEc9cSQrJGwkP0w+QTAhIyRIJEYkYkQ5JCQhI0Q5GyhC?=
+ =?ISO-2022-JP?B?GyRCJCREOSQkJCpPQyEjJEEkYyRzJEglKCVzJTMhPCVJJEckLSRrGyhC?=
+ =?ISO-2022-JP?B?GyRCJE4kRyQ3JGckJiQrISkbKEI=?=
+ <yuri@cpan.tld>
+Subject: 
+ =?ISO-2022-JP?B?GyRCRnxLXDhsJEc9cSQrJGwkP0JqTD4hIyRIJEYkYkQ5JCQhI0Q5GyhC?=
+ =?ISO-2022-JP?B?GyRCJCREOSQkJCpPQyEjJEEkYyRzJEglKCVzJTMhPCVJJEckLSRrGyhC?=
+ =?ISO-2022-JP?B?GyRCJE4kRyQ3JGckJiQrISkbKEI=?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=ISO-2022-JP
+Content-Transfer-Encoding: base64
+X-Mailer: ISO2022JP.pm v0.04_06 (Mail::ISO2022JP http://www.cpan.org/)
+
+GyRCRnxLXDhsJEc9cSQrJGwkP0tcSjghIyRIJEYkYkQ5JCQhI0Q5JCREOSQkJCpPQyEjJEEkYyRz
+JEglKCVzJTMhPCVJJEckLSRrJE4kRyQ3JGckJiQrISkbKEI=
+
+EOF
+
+is ( $got, $expected,
+	'same as above but with longer encoded display-name of address');
