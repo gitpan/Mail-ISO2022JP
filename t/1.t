@@ -8,69 +8,62 @@ use Test::More tests => 4;
 
 BEGIN { use_ok('Mail::ISO2022JP') };
 
-my $mail = Mail::ISO2022JP->new();
+my $mail = Mail::ISO2022JP->new;
 isa_ok( $mail, 'Mail::ISO2022JP' );
 
 # compose a mail containing Japanese characters.
-$mail->date('Mon, 10 Mar 2003 18:48:06 +0900')->compose(
-	'山田 太郎', 'taro@cpan.tld',
-	'川畑 花子', 'hanako@cpan.tld',
-	'今日は',
-	'お元気ですか？　先日はお世話になりました…'
-);
-
+$mail->set('From_addr', 'taro@cpan.tld');
+$mail->set('To_addr'  , 'sakura@cpan.tld, yuri@cpan.tld');
+# mail subject containing Japanese characters.
+$mail->set('Subject'  , '日本語で書かれた題名');
+# mail bocy    containing Japanese characters.
+$mail->set('Body'     , '日本語で書かれた本文。');
+# convert body to ISO-2022-JP (from UTF-8)
+$mail->iso2022jp('Body');
 # output the composed mail
-my $got = $mail->output();
+my $got = $mail->compose;
 
 my $expected = <<'EOF';
-Date: Mon, 10 Mar 2003 18:48:06 +0900
-From: =?ISO-2022-JP?B?
-	GyRCOzNFRBsoQiAbJEJCQE86GyhC
-	?= <taro@cpan.tld>
-To: =?ISO-2022-JP?B?
-	GyRCQG5IKhsoQiAbJEIyVjtSGyhC
-	?= <hanako@cpan.tld>
-Subject: =?ISO-2022-JP?B?
-	GyRCOiNGfCRPGyhC
-	?=
+From: taro@cpan.tld
+To: sakura@cpan.tld, yuri@cpan.tld
+Subject: 
+ =?ISO-2022-JP?B?GyRCRnxLXDhsJEc9cSQrJGwkP0JqTD4bKEI=?=
+ 
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: 7bit
 
-$B$*855$$G$9$+!)!!@hF|$O$*@$OC$K$J$j$^$7$?!D(B
+$BF|K\8l$G=q$+$l$?K\J8!#(B
 EOF
 
 is ( $got, $expected,
 	'composing a ISO-2022-JP encoded mail with MIME Base64 encoded headers');
 
 # compose a long header mail containing Japanese characters.
-$mail->date('Mon, 10 Mar 2003 18:48:06 +0900')->compose(
-	'山田 太郎', 'taro@cpan.tld',
-	'川畑 花子', 'hanako@cpan.tld',
-	'今日は。お元気ですか？　先日はお世話になりました。また会えるといいですね。',
-	'さて、実はこのたび…'
-);
-
+$mail->set('From_addr', 'taro@cpan.tld');
+$mail->set('To_addr'  , 'sakura@cpan.tld, yuri@cpan.tld');
+# mail subject containing Japanese characters.
+$mail->set('Subject'  , '日本語で書かれた題名。とても長い。長い長いお話。ちゃんとエンコードできるのでしょうか？');
+# mail bocy    containing Japanese characters.
+$mail->set('Body'     , '日本語で書かれた本文。');
+# convert body to ISO-2022-JP (from UTF-8)
+$mail->iso2022jp('Body');
 # output the composed mail
-$got = $mail->output();
+my $got = $mail->compose;
 
 $expected = <<'EOF';
-Date: Mon, 10 Mar 2003 18:48:06 +0900
-From: =?ISO-2022-JP?B?
-	GyRCOzNFRBsoQiAbJEJCQE86GyhC
-	?= <taro@cpan.tld>
-To: =?ISO-2022-JP?B?
-	GyRCQG5IKhsoQiAbJEIyVjtSGyhC
-	?= <hanako@cpan.tld>
-Subject: =?ISO-2022-JP?B?
-	GyRCOiNGfCRPISMkKjg1NSQkRyQ5JCshKSEhQGhGfCRPJCpAJE9DJEskSiRqJF4kNyQ/ISMkXiQ/
-	MnEkKCRrJEgkJCQkJEckOSRNISMbKEI=
-	?=
+From: taro@cpan.tld
+To: sakura@cpan.tld, yuri@cpan.tld
+Subject: 
+ =?ISO-2022-JP?B?GyRCRnxLXDhsJEc9cSQrJGwkP0JqTD4hIyRIJEYkYkQ5JCQhI0Q5GyhC?= 
+ =?ISO-2022-JP?B?GyRCJCREOSQkJCpPQyEjJEEkYyRzJEglKCVzJTMhPCVJJEckLSRrGyhC?= 
+ =?ISO-2022-JP?B?GyRCJE4kRyQ3JGckJiQrISkbKEI=?=
+ 
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: 7bit
 
-$B$5$F!"<B$O$3$N$?$S!D(B
+$BF|K\8l$G=q$+$l$?K\J8!#(B
 EOF
 
 is ( $got, $expected,
